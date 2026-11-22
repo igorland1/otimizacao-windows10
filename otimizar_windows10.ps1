@@ -27,7 +27,8 @@ function Show-Menu {
     Write-Host "4. [Sistema] Desativar Telemetria, Bing no Iniciar e Feeds"
     Write-Host "5. [Serviços] Desativar Serviços Pesados de Segundo Plano"
     Write-Host "6. [Limpeza & Disco] Limpar Caches, Temporários e TRIM no SSD"
-    Write-Host "7. [EXECUÇÃO COMPLETA] Aplicar TODAS as otimizações recomendadas"
+    Write-Host "7. [Rede Igreja] Fixar IP 192.168.100.10 (Infraestrutura da Igreja)"
+    Write-Host "8. [EXECUÇÃO COMPLETA] Aplicar TODAS as otimizações recomendadas (1 a 7)"
     Write-Host "0. Sair"
     Write-Host "=================================================================" -ForegroundColor Cyan
 }
@@ -201,10 +202,19 @@ function Invoke-DiskCleanupAndTrim {
     Write-Host "✔️ Limpeza e TRIM concluídos." -ForegroundColor Green
 }
 
+function Invoke-NetworkConfigIgreja {
+    Write-Host "`n[7/7] Configurando IP Estático da Igreja (192.168.100.10)..." -ForegroundColor Green
+    if (Test-Path "$PSScriptRoot\configurar_rede_igreja.ps1") {
+        & "$PSScriptRoot\configurar_rede_igreja.ps1"
+    } else {
+        Write-Warning "Arquivo configurar_rede_igreja.ps1 não encontrado."
+    }
+}
+
 # Execução do Menu
 do {
     Show-Menu
-    $choice = Read-Host "Selecione uma opção (0-7)"
+    $choice = Read-Host "Selecione uma opção (0-8)"
     switch ($choice) {
         "1" { Invoke-RestorePoint; Pause }
         "2" { Invoke-DebloatApps; Pause }
@@ -212,14 +222,16 @@ do {
         "4" { Invoke-SystemTweaksWin10; Pause }
         "5" { Invoke-ServicesOptimization; Pause }
         "6" { Invoke-DiskCleanupAndTrim; Pause }
-        "7" {
+        "7" { Invoke-NetworkConfigIgreja; Pause }
+        "8" {
             Invoke-RestorePoint
             Invoke-DebloatApps
             Invoke-RegistryTweaks
             Invoke-SystemTweaksWin10
             Invoke-ServicesOptimization
             Invoke-DiskCleanupAndTrim
-            Write-Host "`n🎉 Todas as otimizações para Windows 10 foram concluídas com sucesso!" -ForegroundColor Green
+            Invoke-NetworkConfigIgreja
+            Write-Host "`n🎉 Todas as otimizações e a configuração de rede foram concluídas com sucesso!" -ForegroundColor Green
             Write-Host "Reinicie o computador para garantir que todos os serviços e registros sejam carregados perfeitamente." -ForegroundColor Yellow
             Pause
         }

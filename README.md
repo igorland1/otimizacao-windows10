@@ -41,16 +41,26 @@ Quando o usuário disser que baixou o repositório no novo computador ou pedir p
   powershell -ExecutionPolicy Bypass -File .\benchmark.ps1 -Etapa Antes
   ```
 
-### 3. Aplicação do Pacote de Otimização
-- Executar a rotina completa (`Opção 7` do menu ou chamada direta das funções):
+### 3. Configuração de Rede Estática e Otimização
+- Configurar a interface de rede da Igreja com IP estático:
   ```powershell
-  powershell -ExecutionPolicy Bypass -Command "& { . .\otimizar_windows10.ps1; Invoke-RestorePoint; Invoke-DebloatApps; Invoke-RegistryTweaks; Invoke-SystemTweaksWin10; Invoke-ServicesOptimization; Invoke-DiskCleanupAndTrim }"
+  powershell -ExecutionPolicy Bypass -File .\configurar_rede_igreja.ps1
+  ```
+  *(Parâmetros: IP 192.168.100.10, Máscara /24, Gateway 192.168.100.1, DNS 192.168.100.1, 1.1.1.1, 8.8.8.8)*
+
+- Executar a rotina completa (`Opção 8` do menu ou chamada direta das funções):
+  ```powershell
+  powershell -ExecutionPolicy Bypass -Command "& { . .\otimizar_windows10.ps1; Invoke-RestorePoint; Invoke-DebloatApps; Invoke-RegistryTweaks; Invoke-SystemTweaksWin10; Invoke-ServicesOptimization; Invoke-DiskCleanupAndTrim; Invoke-NetworkConfigIgreja }"
   ```
 
 ### 4. Validação de Saúde do Sistema
 - Confirmar que o serviço de proteção/restauração criou o ponto:
   ```powershell
   Get-ComputerRestorePoint | Select-Object -Last 1
+  ```
+- Validar configuração de IP na interface:
+  ```powershell
+  Get-NetIPAddress -InterfaceAlias (Get-NetAdapter -Physical | Where-Object Status -ne Disabled | Select-Object -First 1).Name -AddressFamily IPv4
   ```
 - Validar se o plano de energia de alto desempenho está ativo:
   ```powershell
@@ -75,7 +85,8 @@ Quando o usuário disser que baixou o repositório no novo computador ou pedir p
 
 | Arquivo | Função |
 | :--- | :--- |
-| `otimizar_windows10.ps1` | Script principal modular (Restauração, Debloat, Regedit, Win10 Tweaks, Serviços, TRIM). |
+| `otimizar_windows10.ps1` | Script principal modular (Restauração, Debloat, Regedit, Win10 Tweaks, Serviços, TRIM, Rede). |
+| `configurar_rede_igreja.ps1` | Script dedicado para aplicar IP estático (192.168.100.10), Gateway e DNS na rede da Igreja. |
 | `reverter_windows10.ps1` | Rollback completo para os padrões de fábrica da Microsoft. |
 | `benchmark.ps1` | Coletor de métricas de RAM, processos e threads (Gera JSON e comparativo na tela). |
 | `README.md` | Guia operacional e instruções para o AGY e para o usuário. |
