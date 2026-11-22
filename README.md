@@ -1,50 +1,93 @@
-# Otimização Windows 10 para Estação de Edição de Fotos 🎨📸
+# 🚀 AGY Workstation Setup & Instructions
 
-Toolkit desenvolvido sob medida para **Windows 10** em máquinas com **hardware modesto/limitado**, voltadas especificamente para programas de edição de fotos (Photoshop, Lightroom, RawTherapee, Capture One, etc.).
-
----
-
-## 🎯 Por que esta versão é diferente?
-1. **Foco em RAM e CPU:** Softwares de fotografia consomem gigabytes de cache de imagem (Scratch Disk e RAM). O script ajusta `Win32PrioritySeparation` para dar prioridade quântica ao processo em primeiro plano e força o Windows a descarregar DLLs não utilizadas (`AlwaysUnloadDLL`).
-2. **I/O de Disco (Acesso a Cartões e SSDs):** Desativa o `disablelastaccess` e compatibilidade 8.3 do NTFS, acelerando a navegação em diretórios com milhares de arquivos RAW/JPEG.
-3. **Miniaturas e Fontes Preservadas:** Ao contrário de scripts genéricos de jogos que desativam tudo e deixam as fotos como ícones brancos genéricos, este mantém `IconsOnly = 0` (miniaturas visíveis no Explorer) e ClearType ativo.
-4. **Debloat Específico:** Remove Xbox, Cortana, Mapas, Jogos da Microsoft e utilitários que geram tráfego e consomem RAM em segundo plano.
-5. **Windows 10 Específico:** Desativa o widget "Notícias e Interesses" da barra de tarefas e a pesquisa web do Bing embutida no Menu Iniciar.
+> **Nota para o Agente AGY (Antigravity CLI):**  
+> Ao iniciar o atendimento neste repositório no novo computador com Windows 10, siga rigorosamente as diretrizes operacionais descritas abaixo.
 
 ---
 
-## 🚀 Como Executar no Novo Computador
+## 🎯 Objetivo da Estação de Trabalho
+- **Perfil da Máquina:** Computador com hardware modesto/limitado dedicado exclusivamente para **edição de fotos** (Adobe Photoshop, Lightroom, Capture One, etc.).
+- **Sistema Operacional:** Windows 10.
+- **Prioridades:**
+  1. Máxima liberação de memória RAM e CPU.
+  2. Aceleração de leitura/escrita de disco (I/O para pastas pesadas de arquivos RAW).
+  3. **OBRIGATÓRIO:** Manter miniaturas visíveis no Explorer (`IconsOnly = 0`) e ClearType ativo.
+  4. Eliminação de telemetria, feeds, pesquisas web no Menu Iniciar e serviços de segundo plano.
 
-### Passo 1: Abrir o PowerShell como Administrador
-Pressione as teclas `Win + X` e selecione **Windows PowerShell (Administrador)**.
+---
 
-### Passo 2: Executar o Menu Interativo
-Navegue até a pasta e execute:
+## 🤖 Protocolo de Ação do AGY (Passo a Passo Automático)
+
+Quando o usuário disser que baixou o repositório no novo computador ou pedir para "aplicar a otimização", execute as seguintes etapas:
+
+### 1. Diagnóstico do Ambiente
+- Checar se o terminal está com privilégios de Administrador:
+  ```powershell
+  ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+  ```
+- Obter a versão e build do Windows 10:
+  ```powershell
+  Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsHardwareAbstractionLayer
+  ```
+- Obter informações de hardware (RAM total, CPU e se a unidade C: é SSD/NVMe):
+  ```powershell
+  Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum | ForEach-Object { [math]::Round($_.Sum / 1GB, 2) }
+  Get-PhysicalDisk | Select-Object FriendlyName, MediaType, BusType
+  ```
+
+### 2. Coleta de Benchmark Inicial
+- Executar a medição do estado de fábrica:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\benchmark.ps1 -Etapa Antes
+  ```
+
+### 3. Aplicação do Pacote de Otimização
+- Executar a rotina completa (`Opção 7` do menu ou chamada direta das funções):
+  ```powershell
+  powershell -ExecutionPolicy Bypass -Command "& { . .\otimizar_windows10.ps1; Invoke-RestorePoint; Invoke-DebloatApps; Invoke-RegistryTweaks; Invoke-SystemTweaksWin10; Invoke-ServicesOptimization; Invoke-DiskCleanupAndTrim }"
+  ```
+
+### 4. Validação de Saúde do Sistema
+- Confirmar que o serviço de proteção/restauração criou o ponto:
+  ```powershell
+  Get-ComputerRestorePoint | Select-Object -Last 1
+  ```
+- Validar se o plano de energia de alto desempenho está ativo:
+  ```powershell
+  powercfg /getactivescheme
+  ```
+- Confirmar que a visualização de miniaturas no Explorer está preservada:
+  ```powershell
+  Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "IconsOnly"
+  ```
+
+### 5. Benchmark Comparativo e Orientação
+- Instruir o usuário a reiniciar o sistema para carregar todas as chaves de registro e descarregar serviços.
+- Após o reinício, rodar:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\benchmark.ps1 -Etapa Depois
+  ```
+- Apresentar a economia de processos e RAM em formato amigável.
+
+---
+
+## 📂 Mapa de Arquivos do Repositório
+
+| Arquivo | Função |
+| :--- | :--- |
+| `otimizar_windows10.ps1` | Script principal modular (Restauração, Debloat, Regedit, Win10 Tweaks, Serviços, TRIM). |
+| `reverter_windows10.ps1` | Rollback completo para os padrões de fábrica da Microsoft. |
+| `benchmark.ps1` | Coletor de métricas de RAM, processos e threads (Gera JSON e comparativo na tela). |
+| `README.md` | Guia operacional e instruções para o AGY e para o usuário. |
+
+---
+
+## 🛡️ Procedimento de Emergência / Reversão
+Se algum aplicativo de fotografia apresentar comportamento anômalo ou o usuário solicitar o retorno dos padrões:
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-cd C:\caminho\para\otimizacao-windows10
-.\otimizar_windows10.ps1
+powershell -ExecutionPolicy Bypass -File .\reverter_windows10.ps1
 ```
-
-Escolha a opção **`7`** para rodar a otimização completa recomendada ou navegue pelas opções individuais.
-
----
-
-## 📊 Medindo o Ganho (Benchmark)
-Antes de aplicar as alterações, execute:
+Ou restaurar pelo Ponto de Restauração criado (`AGY_Pre_PhotoOpt`):
 ```powershell
-.\benchmark.ps1 -Etapa Antes
-```
-Após aplicar e reiniciar o computador, execute:
-```powershell
-.\benchmark.ps1 -Etapa Depois
-```
-O script exibirá na tela a redução exata na quantidade de processos e megabytes de memória RAM liberados.
-
----
-
-## 🔄 Reversão (Rollback)
-Se por qualquer motivo desejar retornar os parâmetros ao padrão do Windows:
-```powershell
-.\reverter_windows10.ps1
+Restore-Computer -RestorePoint (Get-ComputerRestorePoint | Where-Object { $_.Description -match "AGY" } | Select-Object -Last 1).SequenceNumber
 ```
