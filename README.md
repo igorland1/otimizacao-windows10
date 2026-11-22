@@ -85,6 +85,8 @@ Quando o usuário disser que baixou o repositório no novo computador ou pedir p
 
 | Arquivo | Função |
 | :--- | :--- |
+| `instalar_agy.bat` | Instalador do AGY com duplo-clique no Windows (dispensa comandos manuais). |
+| `instalar_agy.ps1` | Script PowerShell de instalação/atualização do Antigravity CLI e inclusão no PATH. |
 | `otimizar_windows10.ps1` | Script principal modular (Restauração, Debloat, Regedit, Win10 Tweaks, Serviços, TRIM, Rede). |
 | `configurar_rede_igreja.ps1` | Script dedicado para aplicar IP estático (192.168.100.10), Gateway e DNS na rede da Igreja. |
 | `reverter_windows10.ps1` | Rollback completo para os padrões de fábrica da Microsoft. |
